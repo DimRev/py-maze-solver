@@ -1,22 +1,28 @@
-from graphics import Window, Line, Point, Cell
+from graphics import Window, Cell
+from common import Point
 
 
 def main():
     win = Window(800, 600)
     p1 = Point(10, 10)
-    # p2 = Point(10, 20)
-    p3 = Point(40, 80)
-    # p4 = Point(20, 10)
-    # l1 = Line(p1, p2)
-    # l2 = Line(p2, p3)
-    # l3 = Line(p3, p4)
-    # l4 = Line(p4, p1)
-    # win.draw_line(l1, "black")
-    # win.draw_line(l2, "black")
-    # win.draw_line(l3, "black")
-    # win.draw_line(l4, "black")
-    cell = Cell(p1, p3)
-    win.draw_cell(cell, "black")
+    p2 = Point(40, 40)
+
+    p3 = Point(40, 10)
+    p4 = Point(70, 40)
+
+    p5 = Point(70, 10)
+    p6 = Point(100, 40)
+
+    c1 = Cell(win)
+    c2 = Cell(win)
+    c3 = Cell(win)
+
+    c1.draw(p1, p2, "black")
+    c2.draw(p3, p4, "black")
+    c3.draw(p5, p6, "black")
+    c3.draw_move(c2)
+    c2.draw_move(c1, undo=True)
+
     win.wait_for_close()
 
 

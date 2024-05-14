@@ -1,65 +1,5 @@
 from tkinter import Tk, BOTH, Canvas
-
-
-class Point:
-    """docstring for Point."""
-
-    def __init__(self, x: int, y: int):
-        self.x = x
-        self.y = y
-
-
-class Line:
-    """docstring for Line."""
-
-    def __init__(self, p1: Point, p2: Point):
-        self.__p1 = p1
-        self.__p2 = p2
-
-    def draw(self, canvas: Canvas, fill_color: str):
-        canvas.create_line(
-            self.__p1.x, self.__p1.y, self.__p2.x, self.__p2.y, fill=fill_color, width=2
-        )
-
-
-class Cell(object):
-    """docstring for Cell."""
-
-    def __init__(
-        self,
-        p1: Point,
-        p2: Point,
-        has_left_wall=True,
-        has_top_wall=True,
-        has_right_wall=True,
-        has_bottom_wall=True,
-    ):
-        self.__x1 = p1.x
-        self.__y1 = p1.y
-        self.__x2 = p2.x
-        self.__y2 = p2.y
-        self.has_left_wall = has_left_wall
-        self.has_top_wall = has_top_wall
-        self.has_right_wall = has_right_wall
-        self.has_bottom_wall = has_bottom_wall
-
-    def draw(self, canvas: Canvas, fill_color: str):
-        p1 = Point(self.__x1, self.__y1)
-        p2 = Point(self.__x2, self.__y1)
-        p3 = Point(self.__x2, self.__y2)
-        p4 = Point(self.__x1, self.__y2)
-        if self.has_top_wall:
-            top_line = Line(p1, p2)
-            top_line.draw(canvas, fill_color)
-        if self.has_right_wall:
-            right_line = Line(p2, p3)
-            right_line.draw(canvas, fill_color)
-        if self.has_bottom_wall:
-            bottom_line = Line(p3, p4)
-            bottom_line.draw(canvas, fill_color)
-        if self.has_bottom_wall:
-            left_line = Line(p4, p1)
-            left_line.draw(canvas, fill_color)
+from common import Line
 
 
 class Window:
@@ -86,8 +26,69 @@ class Window:
     def close(self):
         self.__running = False
 
-    def draw_line(self, line: Line, fill_color: str):
+    def draw_line(self, line: "Line", fill_color: str):
         line.draw(self.__canvas, fill_color)
 
-    def draw_cell(self, cell: Cell, fill_color: str):
+    def draw_cell(self, cell: "Cell", fill_color: str):
         cell.draw(self.__canvas, fill_color)
+
+    def draw_move(self, from_cell: "Cell", to_cell: "Cell", undo=False):
+        from_cell.draw_move(self.__canvas, to_cell, undo)
+
+
+from graphics import Window
+from common import Line, Point
+
+
+class Cell:
+    """A Cell connecting 4 points with lines"""
+
+    def __init__(
+        self,
+        win: "Window",
+        has_left_wall=True,
+        has_top_wall=True,
+        has_right_wall=True,
+        has_bottom_wall=True,
+    ):
+        self.has_left_wall = has_left_wall
+        self.has_top_wall = has_top_wall
+        self.has_right_wall = has_right_wall
+        self.has_bottom_wall = has_bottom_wall
+        self.__win = win
+
+    def draw(self, p1: "Point", p2: "Point", fill_color: str):
+        if self.__win is None:
+            return
+        self.__x1 = p1.x
+        self.__x2 = p2.x
+        self.__y1 = p1.y
+        self.__y2 = p2.y
+        if self.has_left_wall:
+            line = Line(Point(self.__x1, self.__y1), Point(self.__x1, self.__y2))
+            self.__win.draw_line(line, fill_color)
+        if self.has_top_wall:
+            line = Line(Point(self.__x1, self.__y1), Point(self.__x2, self.__y1))
+            self.__win.draw_line(line, fill_color)
+        if self.has_right_wall:
+            line = Line(Point(self.__x2, self.__y1), Point(self.__x2, self.__y2))
+            self.__win.draw_line(line, fill_color)
+        if self.has_bottom_wall:
+            line = Line(Point(self.__x1, self.__y2), Point(self.__x2, self.__y2))
+            self.__win.draw_line(line, fill_color)
+
+    def draw_move(self, to_cell: "Cell", undo=False):
+        half_length = abs(self.__x2 - self.__x1) // 2
+        x_center = half_length + self.__x1
+        y_center = half_length + self.__y1
+
+        half_length2 = abs(to_cell.__x2 - to_cell.__x1) // 2
+        x_center2 = half_length2 + to_cell.__x1
+        y_center2 = half_length2 + to_cell.__y1
+
+        fill_color = "red"
+        if undo:
+            fill_color = "gray"
+
+        line = Line(Point(x_center, y_center), Point(x_center2, y_center2))
+        self.__win.draw_line(line, fill_color)
